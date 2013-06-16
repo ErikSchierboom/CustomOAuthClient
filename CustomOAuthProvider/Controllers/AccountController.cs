@@ -19,8 +19,6 @@
         // GET: /Account/Login
         public enum ManageMessageId
         {
-            ChangePasswordSuccess, 
-            SetPasswordSuccess, 
             RemoveLoginSuccess, 
         }
 
@@ -29,22 +27,6 @@
         {
             this.ViewBag.ReturnUrl = returnUrl;
             return this.View();
-        }
-
-        // POST: /Account/Login
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginModel model, string returnUrl)
-        {
-            if (this.ModelState.IsValid && WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe))
-            {
-                return this.RedirectToLocal(returnUrl);
-            }
-
-            // If we got this far, something failed, redisplay form
-            this.ModelState.AddModelError(string.Empty, "The user name or password provided is incorrect.");
-            return View(model);
         }
 
         // POST: /Account/LogOff
@@ -87,7 +69,7 @@
         // GET: /Account/Manage
         public ActionResult Manage(ManageMessageId? message)
         {
-            this.ViewBag.StatusMessage = message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed." : message == ManageMessageId.SetPasswordSuccess ? "Your password has been set." : message == ManageMessageId.RemoveLoginSuccess ? "The external login was removed." : string.Empty;
+            this.ViewBag.StatusMessage = message == ManageMessageId.RemoveLoginSuccess ? "The external login was removed." : string.Empty;
             this.ViewBag.ReturnUrl = this.Url.Action("Manage");
             return this.View();
         }
