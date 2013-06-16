@@ -2,6 +2,7 @@
 {
     using System.Web.Mvc;
 
+    [Authorize]
     public class HomeController : Controller
     {
         [HttpGet]

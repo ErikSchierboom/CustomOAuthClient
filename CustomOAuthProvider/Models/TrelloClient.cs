@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Web;
 
     using DotNetOpenAuth.AspNet;
@@ -13,6 +14,7 @@
     using DotNetOpenAuth.OAuth.Messages;
 
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// An OAuth client for the Trello.com website. Note: as Trello only supports OAuth v1, this class 
@@ -26,6 +28,7 @@
         private const string ProfileUrl = "https://api.trello.com/1/members/me";
 
         private const HttpDeliveryMethods DeliveryMethods = HttpDeliveryMethods.GetRequest | HttpDeliveryMethods.AuthorizationHeaderRequest;
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrelloClient"/> class.
@@ -58,31 +61,22 @@
             try
             {
                 using (var profileResponse = request.GetResponse())
-                using (var responseStream = profileResponse.GetResponseStream())
-                using (var readStream = new StreamReader(responseStream))
+                using (var profileResponseStream = profileResponse.GetResponseStream())
+                using (var profileStreamReader = new StreamReader(profileResponseStream))
                 {
-                    var contents = readStream.ReadToEnd();
+                    var profileStreamContents = profileStreamReader.ReadToEnd();
 
                     // Deserialize the profile contents which is returned in JSON format
-                    var profile = JsonConvert.DeserializeObject<dynamic>(contents);
-
-                    // Extract some information from the profile and store it as extra data
-                    var extraData = new Dictionary<string, string>
-                                        {
-                                            { "avatarHash", (string)profile.avatarHash },
-                                            { "bio", (string)profile.bio },
-                                            { "fullName", (string)profile.fullName },
-                                            { "url", (string)profile.url },
-                                        };
-
+                    var profile = JsonConvert.DeserializeObject<dynamic>(profileStreamContents);
+                    
                     // Return the (successful) authentication result, which also retrieves the user id and username
                     // from the return profile contents
                     return new AuthenticationResult(
                             isSuccessful: true,
-                            provider: ProviderName,
+                            provider: this.ProviderName,
                             providerUserId: (string)profile.id,
                             userName: (string)profile.username,
-                            extraData: extraData);
+                            extraData: GetExtraData(profile));
                 }
             }
             catch (Exception exception)
@@ -91,6 +85,50 @@
                 // the exception to be gracefully handled
                 return new AuthenticationResult(exception);
             }
+        }
+
+        /// <summary>
+        /// Gets the extra data from the profile.
+        /// </summary>
+        /// <param name="profile">The profile.</param>
+        /// <returns>The extra data.</returns>
+        private static Dictionary<string, string> GetExtraData(dynamic profile)
+        {
+            return new Dictionary<string, string>
+                       {
+                           { "id", profile.id.ToString() },
+                           { "avatarHash", profile.avatarHash.ToString() },
+                           { "bio", profile.bio.ToString() },
+                           { "confirmed", profile.confirmed.ToString() },
+                           { "fullName", profile.fullName.ToString() },
+                           { "initials", profile.initials.ToString() },
+                           { "memberType", profile.memberType.ToString() },
+                           { "status", profile.status.ToString() },
+                           { "url", profile.url.ToString() },
+                           { "username", profile.username.ToString() },
+                           { "avatarSource", profile.avatarSource.ToString() },
+                           { "email", profile.email.ToString() },
+                           { "gravatarHash", profile.gravatarHash.ToString() },
+                           { "newEmail", profile.newEmail.ToString() },
+                           { "uploadedAvatarHash", profile.uploadedAvatarHash.ToString() },
+                           { "idBoards", ToCommaSeparatedString(profile.idBoards) },
+                           { "idBoardsInvited", ToCommaSeparatedString(profile.idBoardsInvited) },
+                           { "idBoardsPinned", ToCommaSeparatedString(profile.idBoardsPinned) },
+                           { "idOrganizations", ToCommaSeparatedString(profile.idOrganizations) },
+                           { "idOrganizationsInvited", ToCommaSeparatedString(profile.idOrganizationsInvited) },
+                           { "trophies", ToCommaSeparatedString(profile.trophies) },
+                           { "oneTimeMessagesDismissed", ToCommaSeparatedString(profile.oneTimeMessagesDismissed) },
+                       };
+        }
+
+        /// <summary>
+        /// Convert an array property to a comma-separated string.
+        /// </summary>
+        /// <param name="profileArrayProperty">The profile's array property.</param>
+        /// <returns>The comma-separated string representation of the array property.</returns>
+        private static string ToCommaSeparatedString(dynamic profileArrayProperty)
+        {
+            return string.Join(", ", (JArray)profileArrayProperty);
         }
 
         /// <summary>

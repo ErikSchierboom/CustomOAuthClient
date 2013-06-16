@@ -25,6 +25,11 @@
         private readonly string clientId;
         private readonly string clientSecret;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GitHubClient"/> class.
+        /// </summary>
+        /// <param name="clientId">The client id.</param>
+        /// <param name="clientSecret">The client secret.</param>
         public GitHubClient(string clientId, string clientSecret)
             : base("GitHub")
         {
@@ -32,6 +37,13 @@
             this.clientSecret = clientSecret;
         }
 
+        /// <summary>
+        /// Gets the full url pointing to the login page for this client. The url should include the specified return url so that when the login completes, user is redirected back to that url.
+        /// </summary>
+        /// <param name="returnUrl">The return URL.</param>
+        /// <returns>
+        /// An absolute URL.
+        /// </returns>
         protected override Uri GetServiceLoginUrl(Uri returnUrl)
         {
             var uriBuilder = new UriBuilder(AuthorizeUrl);
@@ -41,6 +53,13 @@
             return uriBuilder.Uri;
         }
 
+        /// <summary>
+        /// Given the access token, gets the logged-in user's data. The returned dictionary must include two keys 'id', and 'username'.
+        /// </summary>
+        /// <param name="accessToken">The access token of the current user.</param>
+        /// <returns>
+        /// A dictionary contains key-value pairs of user data
+        /// </returns>
         protected override IDictionary<string, string> GetUserData(string accessToken)
         {
             var uriBuilder = new UriBuilder(ProfileUrl);
