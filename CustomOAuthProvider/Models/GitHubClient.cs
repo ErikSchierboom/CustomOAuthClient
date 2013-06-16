@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
+    using System.Collections.Specialized;
     using System.Net;
     using System.Text;
     using System.Web;
@@ -21,6 +21,8 @@
         private const string AccessTokenUrl = "https://github.com/login/oauth/access_token";
         private const string AuthorizeUrl = "https://github.com/login/oauth/authorize";
         private const string ProfileUrl = "https://api.github.com/user";
+
+        private const string UserAgent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; MDDC)";
 
         private readonly string clientId;
         private readonly string clientSecret;
@@ -62,47 +64,46 @@
         /// </returns>
         protected override IDictionary<string, string> GetUserData(string accessToken)
         {
-            var uriBuilder = new UriBuilder(ProfileUrl);
-            uriBuilder.AppendQueryArgument("access_token", accessToken);
+            using (var webClient = CreateWebClient())
+            {
+                var uriBuilder = new UriBuilder(ProfileUrl);
+                uriBuilder.AppendQueryArgument("access_token", accessToken);
 
-            var webClient = new WebClient();
-            webClient.Headers["User-Agent"] = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; MDDC)";
-            string downloadString = webClient.DownloadString(uriBuilder.Uri);
+                var profileResponse = webClient.DownloadString(uriBuilder.Uri);
+                var profile = JsonConvert.DeserializeObject<dynamic>(profileResponse);
 
-            var json = JsonConvert.DeserializeObject<dynamic>(downloadString);
-
-            var userData = new Dictionary<string, string>();
-
-            userData.Add("login", (string)json["login"]);
-            userData.Add("id", (string)json["id"]);
-            userData.Add("avatar_url", (string)json["avatar_url"]);
-            userData.Add("gravatar_id", (string)json["gravatar_id"]);
-            userData.Add("url", (string)json["url"]);
-            userData.Add("name", (string)json["name"]);
-            userData.Add("company", (string)json["company"]);
-            userData.Add("blog", (string)json["blog"]);
-            userData.Add("location", (string)json["location"]);
-            userData.Add("email", (string)json["email"]);
-            userData.Add("hireable", (string)json["hireable"]);
-            userData.Add("bio", (string)json["bio"]);
-            userData.Add("public_repos", (string)json["public_repos"]);
-            userData.Add("public_gists", (string)json["public_gists"]);
-            userData.Add("followers", (string)json["followers"]);
-            userData.Add("following", (string)json["following"]);
-            userData.Add("html_url", (string)json["html_url"]);
-            userData.Add("created_at", (string)json["created_at"]);
-            userData.Add("type", (string)json["type"]);
-            userData.Add("total_private_repos", (string)json["total_private_repos"]);
-            userData.Add("owned_private_repos", (string)json["owned_private_repos"]);
-            userData.Add("private_gists", (string)json["private_gists"]);
-            userData.Add("disk_usage", (string)json["disk_usage"]);
-            userData.Add("collaborators", (string)json["collaborators"]);
-            userData.Add("plan_name", (string)json["plan"]["name"]);
-            userData.Add("plan_space", (string)json["plan"]["space"]);
-            userData.Add("plan_collaborators", (string)json["plan"]["collaborators"]);
-            userData.Add("plan_private_repos", (string)json["plan"]["private_repos"]);
-
-            return userData;
+                return new Dictionary<string, string>
+                       {
+                           { "login", profile.login.ToString() }, 
+                           { "id", profile.id.ToString() }, 
+                           { "avatar_url", profile.avatar_url.ToString() }, 
+                           { "gravatar_id", profile.gravatar_id.ToString() }, 
+                           { "url", profile.url.ToString() }, 
+                           { "name", profile.name.ToString() }, 
+                           { "company", profile.company.ToString() }, 
+                           { "blog", profile.blog.ToString() }, 
+                           { "location", profile.location.ToString() }, 
+                           { "email", profile.email.ToString() },
+                           { "hireable", profile.hireable.ToString() }, 
+                           { "bio", profile.bio.ToString() }, 
+                           { "public_repos", profile.public_repos.ToString() }, 
+                           { "public_gists", profile.public_gists.ToString() }, 
+                           { "followers", profile.followers.ToString() }, 
+                           { "following", profile.following.ToString() },
+                           { "html_url", profile.html_url.ToString() }, 
+                           { "created_at", profile.created_at.ToString() }, 
+                           { "type", profile.type.ToString() }, 
+                           { "total_private_repos", profile.total_private_repos.ToString() }, 
+                           { "owned_private_repos", profile.owned_private_repos.ToString() }, 
+                           { "private_gists", profile.private_gists.ToString() },
+                           { "disk_usage", profile.disk_usage.ToString() },
+                           { "collaborators", profile.collaborators.ToString() }, 
+                           { "plan_name", profile.plan.name.ToString() }, 
+                           { "plan_space", profile.plan.space.ToString() }, 
+                           { "plan_collaborators", profile.plan.collaborators.ToString() }, 
+                           { "plan_private_repos", profile.plan.private_repos.ToString() }
+                       };
+            }
         }
 
         /// <summary>
@@ -115,29 +116,31 @@
         /// </returns>
         protected override string QueryAccessToken(Uri returnUrl, string authorizationCode)
         {
-            var postData = new StringBuilder();
-            postData.AppendFormat("client_id={0}", this.clientId);
-            postData.AppendFormat("&redirect_uri={0}", HttpUtility.UrlEncode(returnUrl.ToString().ToLower()));
-            postData.AppendFormat("&client_secret={0}", this.clientSecret);
-            postData.AppendFormat("&code={0}", authorizationCode);
-
-            var webRequest = (HttpWebRequest)WebRequest.Create(AccessTokenUrl);
-            webRequest.Method = "POST";
-            webRequest.ContentType = "application/x-www-form-urlencoded";
-
-            using (var s = webRequest.GetRequestStream())
-            using (var sw = new StreamWriter(s))
+            using (var webClient = CreateWebClient())
             {
-                sw.Write(postData.ToString());
-            }
+                var parameters = new NameValueCollection
+                                          {
+                                              { "client_id", this.clientId },
+                                              { "client_secret", this.clientSecret },
+                                              { "redirect_uri", returnUrl.ToString() },
+                                              { "code", authorizationCode },
+                                          };
 
-            using (var webResponse = webRequest.GetResponse())
-            using (var reader = new StreamReader(webResponse.GetResponseStream()))
-            {
-                var response = reader.ReadToEnd();
-                var nameValueCollection = HttpUtility.ParseQueryString(response);
-                return nameValueCollection["access_token"];
+                var accessTokenResponse = Encoding.UTF8.GetString(webClient.UploadValues(AccessTokenUrl, parameters));
+                var parsedAccessTokenResponse = HttpUtility.ParseQueryString(accessTokenResponse);
+                return parsedAccessTokenResponse["access_token"];
             }
+        }
+
+        /// <summary>
+        /// Creates a web client instance.
+        /// </summary>
+        /// <returns>The web client.</returns>
+        private static WebClient CreateWebClient()
+        {
+            var webClient = new WebClient();
+            webClient.Headers["User-Agent"] = UserAgent;
+            return webClient;
         }
     }
 }

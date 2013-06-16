@@ -17,8 +17,8 @@
 
             // Create and register our custom GitHub client as an OAuth client provider
             var gitHubClient = new GitHubClient(
-                clientId: "ddddd",
-                clientSecret: "eeeee");
+                clientId: "ccccc",
+                clientSecret: "ddddd");
             OAuthWebSecurity.RegisterClient(gitHubClient, "GitHub", null);
         }
     }
