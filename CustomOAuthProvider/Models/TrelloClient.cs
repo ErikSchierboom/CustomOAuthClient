@@ -80,8 +80,8 @@
                     return new AuthenticationResult(
                             isSuccessful: true,
                             provider: ProviderName,
-                            providerUserId: profile.id,
-                            userName: profile.username,
+                            providerUserId: (string)profile.id,
+                            userName: (string)profile.username,
                             extraData: extraData);
                 }
             }
