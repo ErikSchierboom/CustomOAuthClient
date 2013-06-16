@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Text;
     using System.Web;
 
     using DotNetOpenAuth.AspNet;
@@ -39,6 +38,13 @@
         {
         }
 
+        /// <summary>
+        /// Check if authentication succeeded after user is redirected back from the service provider.
+        /// </summary>
+        /// <param name="response">The response token returned from service provider</param>
+        /// <returns>
+        /// Authentication result
+        /// </returns>
         protected override AuthenticationResult VerifyAuthenticationCore(AuthorizedTokenResponse response)
         {
             // Create a endpoint with which we will be retrieving the Trello profile of the authenticated user
@@ -46,55 +52,53 @@
 
             // We need to prepare the profile endpoint for authorization using the access token we have
             // just retrieved. If we would not do this, no access token would be sent along with the
-            // profile request and the 
+            // profile request and the request would fail due to it not being authorized
             var request = this.WebWorker.PrepareAuthorizedRequest(profileEndpoint, response.AccessToken);
 
             try
             {
                 using (var profileResponse = request.GetResponse())
                 using (var responseStream = profileResponse.GetResponseStream())
-                using (var readStream = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")))
+                using (var readStream = new StreamReader(responseStream))
                 {
                     var contents = readStream.ReadToEnd();
-                    var profile = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(contents);
 
-                    throw new NotImplementedException();
-                    /*
+                    // Deserialize the profile contents which is returned in JSON format
+                    var profile = JsonConvert.DeserializeObject<dynamic>(contents);
+
+                    // Extract some information from the profile and store it as extra data
+                    var extraData = new Dictionary<string, string>
+                                        {
+                                            { "avatarHash", (string)profile.avatarHash },
+                                            { "bio", (string)profile.bio },
+                                            { "fullName", (string)profile.fullName },
+                                            { "url", (string)profile.url },
+                                        };
+
+                    // Return the (successful) authentication result, which also retrieves the user id and username
+                    // from the return profile contents
                     return new AuthenticationResult(
                             isSuccessful: true,
                             provider: ProviderName,
-                            providerUserId: userId,
-                            userName: userName,
-                            extraData: extraData);*/
-
-                }
-
-                        /*XDocument document = LoadXDocumentFromStream(responseStream);
-                        string userId = document.Root.Element("id").Value;
-
-                        string firstName = document.Root.Element("first-name").Value;
-                        string lastName = document.Root.Element("last-name").Value;
-                        string userName = firstName + " " + lastName;
-
-                        var extraData = new Dictionary<,> {
-                                                {"accesstoken", accessToken}, 
-                                                {"name", userName}
-                                            };
-
-                        return new AuthenticationResult(
-                            isSuccessful: true,
-                            provider: ProviderName,
-                            providerUserId: userId,
-                            userName: userName,
+                            providerUserId: profile.id,
+                            userName: profile.username,
                             extraData: extraData);
-                         * */
+                }
             }
             catch (Exception exception)
             {
+                // When an exception occurs, we also return that as an authentication result to allow
+                // the exception to be gracefully handled
                 return new AuthenticationResult(exception);
             }
         }
 
+        /// <summary>
+        /// Creates the service provider description. DotNetOpenAuth uses a service provider description
+        /// to determine where to send authorization and token requests to.
+        /// </summary>
+        /// <param name="appName">The name of the app.</param>
+        /// <returns>The complete service provider description.</returns>
         private static ServiceProviderDescription CreateServiceProviderDescription(string appName)
         {
             return new ServiceProviderDescription
