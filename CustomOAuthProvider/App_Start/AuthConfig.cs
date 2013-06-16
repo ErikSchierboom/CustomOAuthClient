@@ -8,12 +8,18 @@
     {
         public static void RegisterAuth()
         {
-            // We create and register our custom Trello OAuth client
+            // Create and register our custom Trello client as an OAuth client provider
             var trelloClient = new TrelloClient(
                 consumerKey: "xxxxxxx", 
                 consumerSecret: "yyyyyy", 
                 appName: "Custom OAuth Provider");
             OAuthWebSecurity.RegisterClient(trelloClient, "Trello", null);
+
+            // Create and register our custom GitHub client as an OAuth client provider
+            var gitHubClient = new GitHubClient(
+                clientId: "aaaaaa", 
+                clientSecret: "bbbbbb");
+            OAuthWebSecurity.RegisterClient(gitHubClient, "GitHub", null);
         }
     }
 }

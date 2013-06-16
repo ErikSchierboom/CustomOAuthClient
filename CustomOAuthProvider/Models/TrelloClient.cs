@@ -20,9 +20,9 @@
     /// </summary>
     public class TrelloClient : OAuthClient
     {
-        private const string RequestUrl = "https://trello.com/1/OAuthGetRequestToken";
-        private const string AccessUrl = "https://trello.com/1/OAuthGetAccessToken";
-        private const string AuthorizeUrl = "https://trello.com/1/OAuthAuthorizeToken";
+        private const string RequestTokenUrl = "https://trello.com/1/OAuthGetRequestToken";
+        private const string AccessTokenUrl = "https://trello.com/1/OAuthGetAccessToken";
+        private const string AuthorizeTokenUrl = "https://trello.com/1/OAuthAuthorizeToken";
         private const string ProfileUrl = "https://api.trello.com/1/members/me";
 
         private const HttpDeliveryMethods DeliveryMethods = HttpDeliveryMethods.GetRequest | HttpDeliveryMethods.AuthorizationHeaderRequest;
@@ -103,13 +103,13 @@
         {
             return new ServiceProviderDescription
                        {
-                           RequestTokenEndpoint = new MessageReceivingEndpoint(RequestUrl, DeliveryMethods),
-                           AccessTokenEndpoint = new MessageReceivingEndpoint(AccessUrl, DeliveryMethods),
+                           RequestTokenEndpoint = new MessageReceivingEndpoint(RequestTokenUrl, DeliveryMethods),
+                           AccessTokenEndpoint = new MessageReceivingEndpoint(AccessTokenUrl, DeliveryMethods),
 
                            // As Trello does not know the concept of consuming apps, we need to explicitly add
                            // the name of the app in the query string so the user will be shown what app is 
                            // requesting authorization
-                           UserAuthorizationEndpoint = new MessageReceivingEndpoint(AuthorizeUrl + "?name=" + HttpUtility.UrlEncode(appName), DeliveryMethods), 
+                           UserAuthorizationEndpoint = new MessageReceivingEndpoint(AuthorizeTokenUrl + "?name=" + HttpUtility.UrlEncode(appName), DeliveryMethods), 
                            TamperProtectionElements = new ITamperProtectionChannelBindingElement[] { new HmacSha1SigningBindingElement() }
                        };
         }
