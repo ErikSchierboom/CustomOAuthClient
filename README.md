@@ -1,7 +1,7 @@
-# CustomOAuthProvider
+# CustomOAuthClient
 
 ## Introduction
-Shows how to use a custom OAuth provider for external authentication in your ASP.NET MVC application. 
+Shows how to use custom OAuth clients for external authentication in your ASP.NET MVC application. 
 
 ## Implementation
 
