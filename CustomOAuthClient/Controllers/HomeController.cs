@@ -1,6 +1,10 @@
 ﻿namespace CustomOAuthProvider.Controllers
 {
+    using System.Data.Entity;
+    using System.Linq;
     using System.Web.Mvc;
+
+    using CustomOAuthProvider.Models;
 
     [Authorize]
     public class HomeController : Controller
@@ -8,9 +12,10 @@
         [HttpGet]
         public ActionResult Index()
         {
-            this.ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
-
-            return this.View();
+            using (var db = new UsersContext())
+            {
+                return this.View(db.UserProfiles.Include(u => u.ExtraData).First(u => u.UserName == User.Identity.Name));
+            }
         }
     }
 }

@@ -110,7 +110,12 @@
                 var loginData = OAuthWebSecurity.SerializeProviderUserId(result.Provider, result.ProviderUserId);
                 this.ViewBag.ProviderDisplayName = OAuthWebSecurity.GetOAuthClientData(result.Provider).DisplayName;
                 this.ViewBag.ReturnUrl = returnUrl;
-                return this.View("ExternalLoginConfirmation", new RegisterExternalLoginModel { UserName = result.UserName, ExternalLoginData = loginData });
+                return this.View("ExternalLoginConfirmation", new RegisterExternalLoginModel
+                                                                  {
+                                                                      UserName = result.UserName, 
+                                                                      ExternalLoginData = loginData,
+                                                                      ExtraData = result.ExtraData
+                                                                  });
             }
         }
 
@@ -139,7 +144,18 @@
                     if (user == null)
                     {
                         // Insert name into the profile table
-                        db.UserProfiles.Add(new UserProfile { UserName = model.UserName });
+                        var userProfile = new UserProfile
+                                              {
+                                                  UserName = model.UserName, 
+                                                  ExtraData = model.ExtraData.Select(kv => new UserProfileExtraData
+                                                                                                {
+                                                                                                    Key = kv.Key,
+                                                                                                    Value = kv.Value,
+                                                                                                    Provider = provider
+                                                                                                }).ToList()
+                                              };
+
+                        db.UserProfiles.Add(userProfile);
                         db.SaveChanges();
 
                         OAuthWebSecurity.CreateOrUpdateAccount(provider, providerUserId, model.UserName);
@@ -196,10 +212,8 @@
             {
                 return this.Redirect(returnUrl);
             }
-            else
-            {
-                return this.RedirectToAction("Index", "Home");
-            }
+            
+            return this.RedirectToAction("Index", "Home");
         }
 
         internal class ExternalLoginResult : ActionResult

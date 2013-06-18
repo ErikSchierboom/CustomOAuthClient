@@ -11,7 +11,7 @@
             // Create and register our custom Trello client as an OAuth client provider
             var trelloClient = new TrelloClient(
                 consumerKey: "aaaaa",
-                consumerSecret: "bbbbbb", 
+                consumerSecret: "bbbbb", 
                 appName: "Custom OAuth Provider");
             OAuthWebSecurity.RegisterClient(trelloClient, "Trello", null);
 
