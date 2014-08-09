@@ -1,5 +1,7 @@
 # CustomOAuthClient
 
+[![Build status](https://ci.appveyor.com/api/projects/status/odwdlelrpuhi6wno)](https://ci.appveyor.com/project/ErikSchierboom/customoauthclient)
+
 ## Introduction
 ASP.NET uses the [DotNetOpenAuth library](http://dotnetopenauth.net/) to connect to external applications using OAuth. By default, ASP.NET MVC 4+ has several built-in OAuth clients that let you use OAuth to authenticate with Google, Microsoft, Facebook, Twitter and more. It also allows you to add new OAuth clients. OAuth version 1 *and* 2 are supported.
 
