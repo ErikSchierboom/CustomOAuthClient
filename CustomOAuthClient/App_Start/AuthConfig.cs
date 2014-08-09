@@ -10,15 +10,15 @@
         {
             // Create and register our custom Trello client as an OAuth client provider
             var trelloClient = new TrelloClient(
-                consumerKey: TODO,
-                consumerSecret: TODO, 
+                consumerKey: "TODO: enter consumer key",
+                consumerSecret: "TODO: enter consumer secret", 
                 appName: "Custom OAuth Provider");
             OAuthWebSecurity.RegisterClient(trelloClient, "Trello", null);
 
             // Create and register our custom GitHub client as an OAuth client provider
             var gitHubClient = new GitHubClient(
-                clientId: TODO,
-                clientSecret: TODO);
+                clientId: "TODO: enter client ID",
+                clientSecret: "TODO: enter client secret");
             OAuthWebSecurity.RegisterClient(gitHubClient, "GitHub", null);
         }
     }
