@@ -1,13 +1,15 @@
-﻿using System;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Threading;
-using System.Web.Mvc;
-using WebMatrix.WebData;
-using CustomOAuthProvider.Models;
-
-namespace CustomOAuthProvider.Filters
+﻿namespace CustomOAuthClient.Filters
 {
+    using System;
+    using System.Data.Entity;
+    using System.Data.Entity.Infrastructure;
+    using System.Threading;
+    using System.Web.Mvc;
+
+    using CustomOAuthClient.Models;
+
+    using WebMatrix.WebData;
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public sealed class InitializeSimpleMembershipAttribute : ActionFilterAttribute
     {

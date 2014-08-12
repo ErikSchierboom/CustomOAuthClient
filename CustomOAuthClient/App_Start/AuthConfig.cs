@@ -1,6 +1,6 @@
-﻿namespace CustomOAuthProvider.App_Start
+﻿namespace CustomOAuthClient
 {
-    using CustomOAuthProvider.Models;
+    using CustomOAuthClient.Models;
 
     using Microsoft.Web.WebPages.OAuth;
 
@@ -10,15 +10,15 @@
         {
             // Create and register our custom Trello client as an OAuth client provider
             var trelloClient = new TrelloClient(
-                consumerKey: "TODO: enter consumer key",
-                consumerSecret: "TODO: enter consumer secret", 
+                consumerKey: "aaaaa",
+                consumerSecret: "bbbbb", 
                 appName: "Custom OAuth Provider");
             OAuthWebSecurity.RegisterClient(trelloClient, "Trello", null);
 
             // Create and register our custom GitHub client as an OAuth client provider
             var gitHubClient = new GitHubClient(
-                clientId: "TODO: enter client ID",
-                clientSecret: "TODO: enter client secret");
+                clientId: "ccccc",
+                clientSecret: "ddddd");
             OAuthWebSecurity.RegisterClient(gitHubClient, "GitHub", null);
         }
     }

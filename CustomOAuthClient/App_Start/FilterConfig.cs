@@ -1,4 +1,4 @@
-﻿namespace CustomOAuthProvider.App_Start
+﻿namespace CustomOAuthClient
 {
     using System.Web.Mvc;
 

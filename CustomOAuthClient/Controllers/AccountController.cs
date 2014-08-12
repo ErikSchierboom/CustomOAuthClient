@@ -1,12 +1,12 @@
-﻿namespace CustomOAuthProvider.Controllers
+﻿namespace CustomOAuthClient.Controllers
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Transactions;
     using System.Web.Mvc;
 
-    using CustomOAuthProvider.Filters;
-    using CustomOAuthProvider.Models;
+    using CustomOAuthClient.Filters;
+    using CustomOAuthClient.Models;
 
     using Microsoft.Web.WebPages.OAuth;
 
@@ -172,7 +172,7 @@
 
             this.ViewBag.ProviderDisplayName = OAuthWebSecurity.GetOAuthClientData(provider).DisplayName;
             this.ViewBag.ReturnUrl = returnUrl;
-            return View(model);
+            return this.View(model);
         }
 
         // GET: /Account/ExternalLoginFailure

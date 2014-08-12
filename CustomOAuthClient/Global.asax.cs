@@ -1,10 +1,8 @@
-﻿namespace CustomOAuthProvider
+﻿namespace CustomOAuthClient
 {
     using System.Web;
     using System.Web.Mvc;
     using System.Web.Routing;
-
-    using CustomOAuthProvider.App_Start;
 
     public class MvcApplication : HttpApplication
     {

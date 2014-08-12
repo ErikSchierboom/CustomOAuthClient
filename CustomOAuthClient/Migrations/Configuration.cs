@@ -1,18 +1,17 @@
-namespace CustomOAuthProvider.Migrations
+namespace CustomOAuthClient.Migrations
 {
-    using System;
-    using System.Data.Entity;
     using System.Data.Entity.Migrations;
-    using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<CustomOAuthProvider.Models.UsersContext>
+    using CustomOAuthClient.Models;
+
+    internal sealed class Configuration : DbMigrationsConfiguration<UsersContext>
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            this.AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(CustomOAuthProvider.Models.UsersContext context)
+        protected override void Seed(UsersContext context)
         {
             //  This method will be called after migrating to the latest version.
 

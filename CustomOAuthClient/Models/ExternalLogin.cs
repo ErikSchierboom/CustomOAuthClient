@@ -1,4 +1,4 @@
-﻿namespace CustomOAuthProvider.Models
+﻿namespace CustomOAuthClient.Models
 {
     public class ExternalLogin
     {

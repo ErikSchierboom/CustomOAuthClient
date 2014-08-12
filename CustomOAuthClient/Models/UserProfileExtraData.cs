@@ -1,4 +1,4 @@
-﻿namespace CustomOAuthProvider.Models
+﻿namespace CustomOAuthClient.Models
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
