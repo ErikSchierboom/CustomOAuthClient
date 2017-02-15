@@ -14,6 +14,7 @@
 
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using System.Linq;
 
     /// <summary>
     /// An OAuth client for the Trello.com website. Note: as Trello only supports OAuth v1, this class 
@@ -66,15 +67,15 @@
                     var profileStreamContents = profileStreamReader.ReadToEnd();
 
                     // Deserialize the profile contents which is returned in JSON format
-                    var profile = JsonConvert.DeserializeObject<dynamic>(profileStreamContents);
+                    var profile = JsonConvert.DeserializeObject<Dictionary<string,object>>(profileStreamContents);
                     
                     // Return the (successful) authentication result, which also retrieves the user id and username
                     // from the return profile contents
                     return new AuthenticationResult(
                             isSuccessful: true,
                             provider: this.ProviderName,
-                            providerUserId: (string)profile.id,
-                            userName: (string)profile.username,
+                            providerUserId: (string)profile["id"],
+                            userName: (string)profile["username"],
                             extraData: GetExtraData(profile));
                 }
             }
@@ -91,43 +92,9 @@
         /// </summary>
         /// <param name="profile">The profile.</param>
         /// <returns>The extra data.</returns>
-        private static Dictionary<string, string> GetExtraData(dynamic profile)
+        private static Dictionary<string, string> GetExtraData(Dictionary<string, object> profile)
         {
-            return new Dictionary<string, string>
-                       {
-                           { "id", profile.id.ToString() },
-                           { "avatarHash", profile.avatarHash.ToString() },
-                           { "bio", profile.bio.ToString() },
-                           { "confirmed", profile.confirmed.ToString() },
-                           { "fullName", profile.fullName.ToString() },
-                           { "initials", profile.initials.ToString() },
-                           { "memberType", profile.memberType.ToString() },
-                           { "status", profile.status.ToString() },
-                           { "url", profile.url.ToString() },
-                           { "username", profile.username.ToString() },
-                           { "avatarSource", profile.avatarSource.ToString() },
-                           { "email", profile.email.ToString() },
-                           { "gravatarHash", profile.gravatarHash.ToString() },
-                           { "newEmail", profile.newEmail.ToString() },
-                           { "uploadedAvatarHash", profile.uploadedAvatarHash.ToString() },
-                           { "idBoards", ToCommaSeparatedString(profile.idBoards) },
-                           { "idBoardsInvited", ToCommaSeparatedString(profile.idBoardsInvited) },
-                           { "idBoardsPinned", ToCommaSeparatedString(profile.idBoardsPinned) },
-                           { "idOrganizations", ToCommaSeparatedString(profile.idOrganizations) },
-                           { "idOrganizationsInvited", ToCommaSeparatedString(profile.idOrganizationsInvited) },
-                           { "trophies", ToCommaSeparatedString(profile.trophies) },
-                           { "oneTimeMessagesDismissed", ToCommaSeparatedString(profile.oneTimeMessagesDismissed) },
-                       };
-        }
-
-        /// <summary>
-        /// Convert an array property to a comma-separated string.
-        /// </summary>
-        /// <param name="profileArrayProperty">The profile's array property.</param>
-        /// <returns>The comma-separated string representation of the array property.</returns>
-        private static string ToCommaSeparatedString(dynamic profileArrayProperty)
-        {
-            return string.Join(", ", (JArray)profileArrayProperty);
+            return profile.ToDictionary(kp => kp.Key, kp => kp.Value?.ToString());
         }
 
         /// <summary>
